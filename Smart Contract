@@ -1,0 +1,66 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract QuantumPiToken is Ownable {
+    uint256 public initialValue = 3141000000000000000; // $3,141.00 (in smallest token units)
+    uint256 public piRate = 314159; // 3.14159% growth rate (scaled)
+    uint256 public startTime;
+    uint256 public lastUpdateTime;
+
+    mapping(address => uint256) public balances;
+
+    // AI & Quantum Variables
+    uint256 public aiAdoptionFactor = 50000; // AI-based factor adjusting adoption & price growth
+    uint256 public quantumSecurityFactor = 1000000; // Security level for quantum encryption
+
+    constructor() {
+        startTime = block.timestamp; // Set initial timestamp
+        lastUpdateTime = startTime;  // Initialize last update time
+        balances[msg.sender] = 1000000 * 10**18; // Example: 1M Pi tokens minted
+    }
+
+    // AI dynamically adjusts the adoption factor for growth stability
+    function updateAIAdoptionFactor(uint256 newFactor) public onlyOwner {
+        aiAdoptionFactor = newFactor;
+    }
+
+    // Quantum security updates to enhance transaction protection
+    function updateQuantumSecurityFactor(uint256 newFactor) public onlyOwner {
+        quantumSecurityFactor = newFactor;
+    }
+
+    // Daily Growth Update: This function is triggered every 24 hours
+    function updateDailyGrowth() public {
+        require(block.timestamp >= lastUpdateTime + 1 days, "Daily update not yet available");
+
+        // Calculate daily compounding growth
+        uint256 timeElapsed = block.timestamp - startTime;
+        uint256 daysElapsed = timeElapsed / 1 days; // Convert to days
+        uint256 newValue = initialValue * (1 + piRate / 1000000 + aiAdoptionFactor / 1000000)**daysElapsed;
+
+        initialValue = newValue; // Update the stored value
+        lastUpdateTime = block.timestamp; // Reset the last update time
+    }
+
+    // Retrieve the current value of Pi token (grows every day)
+    function getCurrentValue() public view returns (uint256) {
+        uint256 timeElapsed = block.timestamp - startTime;
+        uint256 daysElapsed = timeElapsed / 1 days; // Convert seconds to days
+        return initialValue * (1 + piRate / 1000000 + aiAdoptionFactor / 1000000)**daysElapsed;
+    }
+
+    // Transfer Pi tokens with quantum security validation
+    function transfer(address recipient, uint256 amount) public {
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+        balances[msg.sender] -= amount;
+        balances[recipient] += amount;
+    }
+
+    // AI-Driven Token Supply Adjustment (Auto-Balances Market)
+    function autoAdjustSupply(uint256 marketActivity) public onlyOwner {
+        uint256 adjustmentFactor = marketActivity / 1000;
+        piRate = piRate + adjustmentFactor;
+    }
+}
